@@ -181,26 +181,26 @@ function showPage(page){
 }
 
 function getImgUrl(){
-    const seed = currentCate + Math.floor(Math.random() * 100000);
+    const r = Date.now() + Math.floor(Math.random() * 100000);
     switch(currentCate){
         case "风景":
-            return `https://picsum.photos/seed/${seed}/1080/1920?nature`;
+            return `https://picsum.photos/1080/1920?nature&t=${r}`;
         case "汽车":
-            return `https://picsum.photos/seed/${seed}/1080/1920?car`;
+            return `https://picsum.photos/1080/1920?car&t=${r}`;
         case "二次元":
-            return `https://picsum.photos/seed/${seed}/1080/1920?anime`;
+            return `https://picsum.photos/1080/1920?anime&t=${r}`;
         case "人像":
-            return `https://picsum.photos/seed/${seed}/1080/1920?portrait`;
+            return `https://picsum.photos/1080/1920?portrait&t=${r}`;
         case "美食":
-            return `https://picsum.photos/seed/${seed}/1080/1920?food`;
+            return `https://picsum.photos/1080/1920?food&t=${r}`;
         case "影视":
-            return `https://picsum.photos/seed/${seed}/1080/1920?movie`;
+            return `https://picsum.photos/1080/1920?movie&t=${r}`;
         case "古风":
-            return `https://picsum.photos/seed/${seed}/1080/1920?chinese`;
+            return `https://picsum.photos/1080/1920?chinese&t=${r}`;
         case "游戏":
-            return `https://picsum.photos/seed/${seed}/1080/1920?game`;
+            return `https://picsum.photos/1080/1920?game&t=${r}`;
         default:
-            return `https://picsum.photos/seed/${seed}/1080/1920?random`;
+            return `https://picsum.photos/1080/1920?random&t=${r}`;
     }
 }
 
