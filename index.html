@@ -1,284 +1,328 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1.0" />
-<title>极简壁纸</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>极简壁纸</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#121212" />
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#121212">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: sans-serif;
+      padding-bottom: 70px;
+    }
 
-<style>
-* { margin:0; padding:0; box-sizing:border-box; }
-body {
-    background:#121212;
-    color:#fff;
-    font-family:sans-serif;
-    padding-bottom:70px;
-}
+    /* 顶部栏 */
+    .top-bar {
+      position: sticky;
+      top: 0;
+      background: #1f1f1f;
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+    .top-bar input {
+      margin-top: 8px;
+      width: 90%;
+      padding: 8px 12px;
+      border-radius: 20px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      background: #333;
+      color: #fff;
+    }
 
-.top-bar {
-    position:sticky;
-    top:0;
-    background:#1f1f1f;
-    padding:12px;
-    text-align:center;
-    box-shadow:0 2px 8px rgba(0,0,0,.4);
-    z-index:10;
-}
-.top-bar input {
-    margin-top:8px;
-    width:90%;
-    padding:8px 12px;
-    border-radius:20px;
-    border:none;
-    outline:none;
-    font-size:14px;
-}
+    /* 页面切换 */
+    .page {
+      display: none;
+      padding: 10px;
+    }
+    .page.active {
+      display: block;
+    }
 
-.page { display:none; padding:10px; }
-.page.active { display:block; }
+    /* 底部导航 */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 60px;
+      background: #1f1f1f;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+    }
+    .nav-item,
+    .class-item {
+      background: none;
+      border: none;
+      font-family: sans-serif;
+      cursor: pointer;
+      color: #999;
+      font-size: 16px;
+    }
+    .nav-item.active {
+      color: #fff;
+      font-weight: bold;
+    }
 
-.nav-bar {
-    position:fixed;
-    bottom:0;
-    left:0;
-    width:100%;
-    height:60px;
-    background:#1f1f1f;
-    display:flex;
-    justify:space-around;
-    align-items:center;
-}
-
-.nav-item, .class-item {
-    background:none;
-    border:none;
-    font-family:sans-serif;
-    cursor:pointer;
-    color:#999;
-    font-size:16px;
-}
-.nav-item.active { color:#fff; font-weight:bold; }
-
-.wall-list {
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:12px;
-}
+    /* 壁纸列表（网格布局） */
+    .wall-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
     .wall-item {
-    overflow: hidden;
-}
-    
-.wall-item img {
-    width:100%;
-    border-radius:12px;
-    aspect-ratio:9/16;
-    object-fit:cover;
-    background:#222;
-}
+      background: #222;
+      border-radius: 12px;
+      overflow: hidden;
+      aspect-ratio: 9/16; /* 保持手机壁纸比例 */
+    }
+    .wall-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.3s;
+    }
+    .wall-item img:hover {
+      transform: scale(1.02);
+    }
 
-.class-list {
-    display:flex;
-    flex-direction:column;
-    gap:12px;
-    margin-top:20px;
-}
-.class-item {
-    background:#1f1f1f;
-    padding:18px;
-    border-radius:10px;
-    font-size:16px;
-    text-align:left;
-}
+    /* 分类列表 */
+    .class-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .class-item {
+      background: #1f1f1f;
+      padding: 18px;
+      border-radius: 10px;
+      font-size: 16px;
+      text-align: left;
+      transition: background 0.2s;
+    }
+    .class-item:hover {
+      background: #333;
+    }
 
-.loading {
-    text-align:center;
-    padding:20px;
-    color:#aaa;
-}
+    /* 加载中 */
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #aaa;
+    }
 
-.preview-box {
-    position:fixed;
-    inset:0;
-    background:rgba(0,0,0,.98);
-    display:none;
-    z-index:999;
-}
-.preview-box img {
-    width:90%;
-    margin:80px auto;
-    display:block;
-    border-radius:12px;
-}
-.btn-box { text-align:center; margin-top:30px; }
-.btn {
-    padding:10px 25px;
-    background:#2979ff;
-    border:none;
-    color:#fff;
-    border-radius:6px;
-    margin:0 8px;
-    cursor:pointer;
-}
-</style>
+    /* 预览弹窗 */
+    .preview-box {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.98);
+      display: none;
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+    .preview-box img {
+      width: 90%;
+      max-width: 600px;
+      border-radius: 12px;
+    }
+    .btn-box {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .btn {
+      padding: 10px 25px;
+      background: #2979ff;
+      border: none;
+      color: #fff;
+      border-radius: 6px;
+      margin: 0 8px;
+      cursor: pointer;
+    }
+    .btn:hover {
+      background: #1565c0;
+    }
+  </style>
 </head>
 
 <body>
-
-<div class="top-bar">
+  <!-- 顶部栏 -->
+  <div class="top-bar">
     <div id="topTitle">极简壁纸</div>
-    <input id="searchInput" placeholder="搜索分类或关键词">
-</div>
+    <input id="searchInput" placeholder="搜索分类或关键词" />
+  </div>
 
-<div id="homePage" class="page active">
+  <!-- 首页（壁纸列表） -->
+  <div id="homePage" class="page active">
     <div class="wall-list" id="wallList"></div>
     <div class="loading" id="loading">加载中...</div>
-</div>
+  </div>
 
-<div id="catePage" class="page">
+  <!-- 分类页 -->
+  <div id="catePage" class="page">
     <div class="class-list">
-        <button class="class-item" data-cate="风景">🌄 风景壁纸</button>
-        <button class="class-item" data-cate="汽车">🚗 汽车机车壁纸</button>
-        <button class="class-item" data-cate="二次元">🎨 二次元动漫壁纸</button>
-        <button class="class-item" data-cate="人像">👩 美女人像壁纸</button>
-        <button class="class-item" data-cate="美食">🍔 美食静物壁纸</button>
-        <button class="class-item" data-cate="影视">🎬 影视大片壁纸</button>
-        <button class="class-item" data-cate="古风">🏮 古风国风壁纸</button>
-        <button class="class-item" data-cate="游戏">🎮 游戏电竞壁纸</button>
+      <button class="class-item" data-cate="风景">🌄 风景壁纸</button>
+      <button class="class-item" data-cate="汽车">🚗 汽车机车壁纸</button>
+      <button class="class-item" data-cate="二次元">🎨 二次元动漫壁纸</button>
+      <button class="class-item" data-cate="人像">👩 美女人像壁纸</button>
+      <button class="class-item" data-cate="美食">🍔 美食静物壁纸</button>
+      <button class="class-item" data-cate="影视">🎬 影视大片壁纸</button>
+      <button class="class-item" data-cate="古风">🏮 古风国风壁纸</button>
+      <button class="class-item" data-cate="游戏">🎮 游戏电竞壁纸</button>
     </div>
-</div>
+  </div>
 
-<div class="nav-bar">
+  <!-- 底部导航 -->
+  <div class="nav-bar">
     <button class="nav-item active" onclick="showPage('home')">首页</button>
     <button class="nav-item" onclick="showPage('cate')">分类</button>
-</div>
+  </div>
 
-<div class="preview-box" id="previewBox">
-    <img id="previewImg">
+  <!-- 预览弹窗 -->
+  <div class="preview-box" id="previewBox">
+    <img id="previewImg" />
     <div class="btn-box">
-        <button class="btn" onclick="saveImg()">保存图片</button>
-        <button class="btn" onclick="closePre()">关闭</button>
+      <button class="btn" onclick="saveImg()">保存图片</button>
+      <button class="btn" onclick="closePre()">关闭</button>
     </div>
-</div>
+  </div>
 
-<script>
-let currentPage = "home";
-let currentCate = "随机";
-let oldImgArr = [];
-let lock = false;
+  <script>
+    let currentPage = "home";
+    let currentCate = "随机";
+    let oldImgArr = [];
+    let lock = false;
 
-const wallList = document.getElementById("wallList");
-const previewBox = document.getElementById("previewBox");
-const previewImg = document.getElementById("previewImg");
-const topTitle = document.getElementById("topTitle");
+    const wallList = document.getElementById("wallList");
+    const previewBox = document.getElementById("previewBox");
+    const previewImg = document.getElementById("previewImg");
+    const topTitle = document.getElementById("topTitle");
+    const loading = document.getElementById("loading");
 
-function showPage(page){
-    currentPage = page;
-    document.querySelectorAll(".page").forEach(p =>
-        p.classList.toggle("active", p.id === page + "Page")
-    );
-    document.querySelectorAll(".nav-item")[0]
-        .classList.toggle("active", page === "home");
-    document.querySelectorAll(".nav-item")[1]
-        .classList.toggle("active", page === "cate");
-}
-
-function getImgUrl(){
-    const r = Date.now() + Math.floor(Math.random() * 100000);
-    switch(currentCate){
-        case "风景":
-            return `https://picsum.photos/1080/1920?nature&t=${r}`;
-        case "汽车":
-            return `https://picsum.photos/1080/1920?car&t=${r}`;
-        case "二次元":
-            return `https://picsum.photos/1080/1920?anime&t=${r}`;
-        case "人像":
-            return `https://picsum.photos/1080/1920?portrait&t=${r}`;
-        case "美食":
-            return `https://picsum.photos/1080/1920?food&t=${r}`;
-        case "影视":
-            return `https://picsum.photos/1080/1920?movie&t=${r}`;
-        case "古风":
-            return `https://picsum.photos/1080/1920?chinese&t=${r}`;
-        case "游戏":
-            return `https://picsum.photos/1080/1920?game&t=${r}`;
-        default:
-            return `https://picsum.photos/1080/1920?random&t=${r}`;
+    // 页面切换
+    function showPage(page) {
+      currentPage = page;
+      document.querySelectorAll(".page").forEach((p) => {
+        p.classList.toggle("active", p.id === page + "Page");
+      });
+      document.querySelectorAll(".nav-item")[0].classList.toggle("active", page === "home");
+      document.querySelectorAll(".nav-item")[1].classList.toggle("active", page === "cate");
     }
-}
 
-function loadMore(){
-    let html = wallList.innerHTML;
-    for(let i=0;i<20;i++){
-        const url = getImgUrl();
-        if(oldImgArr.includes(url)) continue;
-        oldImgArr.push(url);
-        html += `<div class="wall-item" onclick="openPre('${url}')">
-            <img src="${url}" loading="lazy"></div>`;
+    // 生成「带分类」的图片 URL（关键！确保分类生效）
+    function getImgUrl() {
+      const timestamp = Date.now(); // 防止缓存
+      const cateParam = currentCate === "随机" ? "random" : currentCate.toLowerCase();
+      return `https://picsum.photos/1080/1920?${cateParam}&t=${timestamp}`;
     }
-    wallList.innerHTML = html;
-}
 
-function openPre(url){
-    previewImg.src = url;
-    previewBox.style.display = "block";
-}
-function closePre(){
-    previewBox.style.display = "none";
-}
-function saveImg(){
-    const a = document.createElement("a");
-    a.href = previewImg.src;
-    a.download = "极简壁纸.jpg";
-    a.click();
-}
+    // 加载更多壁纸
+    function loadMore() {
+      let html = wallList.innerHTML;
+      loading.style.display = "block"; // 显示加载中
 
-document.querySelectorAll(".class-item").forEach(btn=>{
-    btn.onclick = ()=>{
+      // 模拟加载（实际项目中可去掉，这里为了演示）
+      setTimeout(() => {
+        for (let i = 0; i < 20; i++) {
+          const url = getImgUrl();
+          if (oldImgArr.includes(url)) continue; // 避免重复
+          oldImgArr.push(url);
+          html += `<div class="wall-item" onclick="openPre('${url}')">
+            <img src="${url}" loading="lazy" alt="壁纸" />
+          </div>`;
+        }
+        wallList.innerHTML = html;
+        loading.style.display = "none"; // 隐藏加载中
+      }, 300);
+    }
+
+    // 打开预览
+    function openPre(url) {
+      previewImg.src = url;
+      previewBox.style.display = "flex"; // 用 flex 居中
+    }
+
+    // 关闭预览
+    function closePre() {
+      previewBox.style.display = "none";
+    }
+
+    // 保存图片
+    function saveImg() {
+      const a = document.createElement("a");
+      a.href = previewImg.src;
+      a.download = "极简壁纸.jpg";
+      a.click();
+    }
+
+    // 分类按钮点击事件
+    document.querySelectorAll(".class-item").forEach((btn) => {
+      btn.onclick = () => {
         currentCate = btn.dataset.cate;
         topTitle.innerText = currentCate + "壁纸";
-        oldImgArr = [];
-        wallList.innerHTML = "";
-        showPage("home");
-        loadMore();
-    };
-});
+        oldImgArr = []; // 清空历史图片
+        wallList.innerHTML = ""; // 清空列表
+        showPage("home"); // 切回首页
+        loadMore(); // 加载新图
+      };
+    });
 
-document.getElementById("searchInput").addEventListener("keyup", e=>{
-    const k = e.target.value.trim();
-    if(!k) return;
-    const match = ["风景","汽车","二次元","人像","美食","影视","古风","游戏"]
-        .find(c=>c.includes(k));
-    if(match){
+    // 搜索框事件
+    document.getElementById("searchInput").addEventListener("keyup", (e) => {
+      const k = e.target.value.trim();
+      if (!k) return;
+      const match = ["风景", "汽车", "二次元", "人像", "美食", "影视", "古风", "游戏"].find((c) =>
+        c.includes(k)
+      );
+      if (match) {
         currentCate = match;
         topTitle.innerText = match + "壁纸";
         oldImgArr = [];
         wallList.innerHTML = "";
         showPage("home");
         loadMore();
-    }
-});
+      }
+    });
 
-document.addEventListener("DOMContentLoaded", loadMore);
+    // 页面加载完成后初始化
+    document.addEventListener("DOMContentLoaded", () => {
+      loadMore(); // 首次加载
+    });
 
-window.addEventListener("scroll",()=>{
-    if(lock) return;
-    const st = document.documentElement.scrollTop || document.body.scrollTop;
-    const sh = document.documentElement.scrollHeight;
-    const ch = document.documentElement.clientHeight;
-    if(st + ch >= sh - 400){
+    // 滚动加载更多
+    window.addEventListener("scroll", () => {
+      if (lock) return;
+      const st = document.documentElement.scrollTop || document.body.scrollTop;
+      const sh = document.documentElement.scrollHeight;
+      const ch = document.documentElement.clientHeight;
+      if (st + ch >= sh - 400) {
         lock = true;
         loadMore();
-        setTimeout(()=>lock=false,800);
-    }
-});
-
-if("serviceWorker" in navigator){
-    window.addEventListener("load",()=>{
-        navigator.serviceWorker.register("service-worker.js");
+        setTimeout(() => (lock = false), 800); // 防抖
+      }
     });
-}
-</script>
+
+    // 注册 Service Worker（PWA 必需）
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
+  </script>
 </body>
 </html>
