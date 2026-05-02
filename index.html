@@ -209,17 +209,18 @@ function getQuery() {
     case "二次元": return "anime";
     case "人像": return "portrait";
     case "美食": return "food";
-    case "影视": return "cinema";
-    case "古风": return "chinese traditional";
+    case "影视": return "movie";
+    case "古风": return "chinese";
     case "游戏": return "game";
     default: return "wallpaper";
   }
 }
 
+// 关键修复：换成支持关键词分类的接口
 function getImgUrl() {
   const q = getQuery();
   const t = Date.now() + Math.random();
-  return `https://picsum.photos/seed/${q}${t}/1080/1920`;
+  return `https://loremflickr.com/1080/1920/${q}?random=${t}`;
 }
 
 function loadMore() {
