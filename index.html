@@ -4,10 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>极简壁纸</title>
-
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#121212" />
-
   <style>
     * {
       margin: 0;
@@ -20,14 +18,13 @@
       font-family: sans-serif;
       padding-bottom: 70px;
     }
-
     .top-bar {
       position: sticky;
       top: 0;
       background: #1f1f1f;
       padding: 12px;
       text-align: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
       z-index: 10;
     }
     .top-bar input {
@@ -41,7 +38,6 @@
       background: #333;
       color: #fff;
     }
-
     .page {
       display: none;
       padding: 10px;
@@ -49,7 +45,6 @@
     .page.active {
       display: block;
     }
-
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -61,9 +56,7 @@
       justify-content: space-around;
       align-items: center;
     }
-
-    .nav-item,
-    .class-item {
+    .nav-item, .class-item {
       background: none;
       border: none;
       font-family: sans-serif;
@@ -75,61 +68,52 @@
       color: #fff;
       font-weight: bold;
     }
-
     .wall-list {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 10px;
     }
-
     .wall-item {
       background: #222;
       border-radius: 12px;
       overflow: hidden;
       aspect-ratio: 9/16;
     }
-
     .wall-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
-
     .class-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-top: 20px;
     }
-
     .loading {
       text-align: center;
       padding: 20px;
       color: #aaa;
     }
-
     .preview-box {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.98);
+      background: rgba(0,0,0,0.98);
       display: none;
       z-index: 999;
       justify-content: center;
       align-items: center;
     }
-
     .preview-box img {
       width: 90%;
       max-width: 600px;
       border-radius: 12px;
     }
-
     .btn-box {
       text-align: center;
       margin-top: 30px;
     }
-
     .btn {
       padding: 10px 25px;
       background: #2979ff;
@@ -141,8 +125,8 @@
     }
   </style>
 </head>
-
 <body>
+
   <div class="top-bar">
     <div id="topTitle">极简壁纸</div>
     <input id="searchInput" placeholder="搜索分类或关键词" />
@@ -179,150 +163,120 @@
     </div>
   </div>
 
-  <!-- ✅ 唯一合法的 script -->
- let currentPage = "home";
+<script>
+let currentPage = "home";
 let currentCate = "随机";
 let oldImgArr = [];
 let lock = false;
 
-// 延迟等页面DOM加载完成再获取元素，杜绝报错
 let wallList, previewBox, previewImg, topTitle, loading;
 
-// 页面初始化完成再执行所有逻辑
-document.addEventListener("DOMContentLoaded", function(){
-    wallList = document.getElementById("wallList");
-    previewBox = document.getElementById("previewBox");
-    previewImg = document.getElementById("previewImg");
-    topTitle = document.getElementById("topTitle");
-    loading = document.getElementById("loading");
+document.addEventListener("DOMContentLoaded", function() {
+  wallList = document.getElementById("wallList");
+  previewBox = document.getElementById("previewBox");
+  previewImg = document.getElementById("previewImg");
+  topTitle = document.getElementById("topTitle");
+  loading = document.getElementById("loading");
 
-    // 绑定分类点击事件
-    document.querySelectorAll(".class-item").forEach(btn=>{
-        btn.onclick = ()=>{
-            // 兼容 文字直接赋值，不用data-cate，杜绝空值bug
-            currentCate = btn.innerText.replace("壁纸","").trim();
-            topTitle.innerText = currentCate + "壁纸";
-            oldImgArr = [];
-            wallList.innerHTML = "";
-            showPage("home");
-            loadMore();
-        };
-    });
+  document.querySelectorAll(".class-item").forEach(btn => {
+    btn.onclick = () => {
+      currentCate = btn.dataset.cate;
+      topTitle.innerText = currentCate + "壁纸";
+      oldImgArr = [];
+      wallList.innerHTML = "";
+      showPage("home");
+      loadMore();
+    };
+  });
 
-    // 首页默认加载
-    loadMore();
+  loadMore();
 });
 
-// 页面切换 纯原生稳定 无刷新无回弹
-function showPage(page){
-    currentPage = page;
-    document.querySelectorAll(".page").forEach(p =>
-        p.classList.toggle("active", p.id === page + "Page")
-    );
-    let navs = document.querySelectorAll(".nav-item");
-    navs[0].classList.toggle("active", page === "home");
-    navs[1].classList.toggle("active", page === "cate");
+function showPage(page) {
+  currentPage = page;
+  document.querySelectorAll(".page").forEach(p => {
+    p.classList.toggle("active", p.id === page + "Page");
+  });
+  const navs = document.querySelectorAll(".nav-item");
+  navs[0].classList.toggle("active", page === "home");
+  navs[1].classList.toggle("active", page === "cate");
 }
 
-// 分类关键词匹配
-function getQuery(){
-    switch(currentCate){
-        case "风景": return "nature";
-        case "汽车": return "car";
-        case "二次元": return "anime";
-        case "人像": return "portrait";
-        case "美食": return "food";
-        case "影视": return "cinema";
-        case "古风": return "chinese traditional";
-        case "游戏": return "game";
-        default: return "wallpaper";
-    }
+function getQuery() {
+  switch (currentCate) {
+    case "风景": return "nature";
+    case "汽车": return "car";
+    case "二次元": return "anime";
+    case "人像": return "portrait";
+    case "美食": return "food";
+    case "影视": return "cinema";
+    case "古风": return "chinese traditional";
+    case "游戏": return "game";
+    default: return "wallpaper";
+  }
 }
 
-// 【核心修复】换掉unsplash回弹接口，改用稳定不刷新、不触发页面重载的图片源
-function getImgUrl(){
-    const q = getQuery();
-    const t = Date.now() + Math.random();
-    // 换成绝对不会触发页面刷新、不会回弹的稳定接口
-    return `https://picsum.photos/seed/${q}${t}/1080/1920`;
+function getImgUrl() {
+  const q = getQuery();
+  const t = Date.now() + Math.random();
+  return `https://picsum.photos/seed/${q}${t}/1080/1920`;
 }
 
-// 加载更多壁纸 修复加载锁死bug
-function loadMore(){
-    if(lock) return;
-    lock = true;
-    loading.style.display = "block";
+function loadMore() {
+  if (lock) return;
+  lock = true;
+  loading.style.display = "block";
 
-    let html = wallList.innerHTML;
-    for(let i=0;i<20;i++){
-        const url = getImgUrl();
-        if(oldImgArr.includes(url)) continue;
-        oldImgArr.push(url);
-        html += `
-        <div class="wall-item" onclick="openPre('${url}')">
-            <img src="${url}" loading="lazy">
-        </div>`;
-    }
-    wallList.innerHTML = html;
-    loading.style.display = "none";
-    
-    // 修复：延迟解锁，不会卡死滚动加载
-    setTimeout(()=>{
-        lock = false;
-    }, 600);
+  let html = wallList.innerHTML;
+  for (let i = 0; i < 20; i++) {
+    const url = getImgUrl();
+    if (oldImgArr.includes(url)) continue;
+    oldImgArr.push(url);
+    html += `
+    <div class="wall-item" onclick="openPre('${url}')">
+      <img src="${url}" loading="lazy">
+    </div>`;
+  }
+
+  wallList.innerHTML = html;
+  loading.style.display = "none";
+  setTimeout(() => lock = false, 600);
 }
 
-// 预览关闭保存
-function openPre(url){
-    previewImg.src = url;
-    previewBox.style.display = "flex";
-}
-function closePre(){
-    previewBox.style.display = "none";
-}
-function saveImg(){
-    const a = document.createElement("a");
-    a.href = previewImg.src;
-    a.download = "极简壁纸_"+Date.now()+".jpg";
-    a.click();
+function openPre(url) {
+  previewImg.src = url;
+  previewBox.style.display = "flex";
 }
 
-// 搜索框兼容保留
-document.addEventListener("keyup", e=>{
-    if(e.target.id !== "searchInput") return;
-    const k = e.target.value.trim();
-    if(!k) return;
-    currentCate = k;
-    topTitle.innerText = k + "壁纸";
-    oldImgArr = [];
-    wallList.innerHTML = "";
-    showPage("home");
-    loadMore();
+function closePre() {
+  previewBox.style.display = "none";
+}
+
+function saveImg() {
+  const a = document.createElement("a");
+  a.href = previewImg.src;
+  a.download = "极简壁纸_" + Date.now() + ".jpg";
+  a.click();
+}
+
+document.getElementById("searchInput").addEventListener("keyup", e => {
+  const k = e.target.value.trim();
+  if (!k) return;
+  currentCate = k;
+  topTitle.innerText = k + "壁纸";
+  oldImgArr = [];
+  wallList.innerHTML = "";
+  showPage("home");
+  loadMore();
 });
 
-// 无限下拉加载 完美修复
-window.addEventListener("scroll",()=>{
-    if(lock) return;
-    const st = document.documentElement.scrollTop || document.body.scrollTop;
-    const sh = document.documentElement.scrollHeight;
-    const ch = document.documentElement.clientHeight;
-    if(st + ch >= sh - 400){
-        loadMore();
-    }
+window.addEventListener("scroll", () => {
+  if (lock) return;
+  const st = document.documentElement.scrollTop || document.body.scrollTop;
+  const sh = document.documentElement.scrollHeight;
+  const ch = document.documentElement.clientHeight;
+  if (st + ch >= sh - 400) loadMore();
 });
 </script>
-
----
-
-# 现在全部bug彻底根治，再也不会回弹跳首页
-✅ 换掉了导致页面刷新回弹的图片接口
-✅ 不用data-cate，直接读取分类文字，不会赋值错乱
-✅ DOM延迟获取，杜绝JS报错卡死
-✅ 滚动加载加解锁，不会加载卡死
-✅ 去掉干扰页面的serviceWorker代码
-✅ 点击分类 → 正常切壁纸页、加载对应分类图、**绝对不会自动跳回分类页/首页**
-✅ 来回切换、无限下拉、去重、预览、保存 全部正常稳定
-
-你直接把你原来整段script删掉，复制我这段粘贴上去，打开直接完美运行，这个卡了你好久的跳转bug直接彻底消失。
 </body>
 </html>
