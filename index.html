@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>极简壁纸</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#121212" />
   <style>
     * {
       margin: 0;
@@ -63,6 +61,7 @@
       cursor: pointer;
       color: #999;
       font-size: 16px;
+      padding:16px;
     }
     .nav-item.active {
       color: #fff;
@@ -139,14 +138,14 @@
 
   <div id="catePage" class="page">
     <div class="class-list">
-      <button class="class-item" data-cate="风景">🌄 风景壁纸</button>
-      <button class="class-item" data-cate="汽车">🚗 汽车机车壁纸</button>
-      <button class="class-item" data-cate="二次元">🎨 二次元动漫壁纸</button>
-      <button class="class-item" data-cate="人像">👩 美女人像壁纸</button>
-      <button class="class-item" data-cate="美食">🍔 美食静物壁纸</button>
-      <button class="class-item" data-cate="影视">🎬 影视大片壁纸</button>
-      <button class="class-item" data-cate="古风">🏮 古风国风壁纸</button>
-      <button class="class-item" data-cate="游戏">🎮 游戏电竞壁纸</button>
+      <button class="class-item" data-type="fengjing">🌄 风景壁纸</button>
+      <button class="class-item" data-type="qiche">🚗 汽车机车壁纸</button>
+      <button class="class-item" data-type="dongman">🎨 二次元动漫壁纸</button>
+      <button class="class-item" data-type="renxiang">👩 美女人像壁纸</button>
+      <button class="class-item" data-type="meishi">🍔 美食静物壁纸</button>
+      <button class="class-item" data-type="yingshi">🎬 影视大片壁纸</button>
+      <button class="class-item" data-type="gufeng">🏮 古风国风壁纸</button>
+      <button class="class-item" data-type="youxi">🎮 游戏电竞壁纸</button>
     </div>
   </div>
 
@@ -164,120 +163,122 @@
   </div>
 
 <script>
-let currentPage = "home";
-let currentCate = "随机";
+let currentType = "suiji";
 let oldImgArr = [];
 let lock = false;
 
 let wallList, previewBox, previewImg, topTitle, loading;
 
-document.addEventListener("DOMContentLoaded", function() {
-  wallList = document.getElementById("wallList");
-  previewBox = document.getElementById("previewBox");
-  previewImg = document.getElementById("previewImg");
-  topTitle = document.getElementById("topTitle");
-  loading = document.getElementById("loading");
+document.addEventListener("DOMContentLoaded", function(){
+    wallList = document.getElementById("wallList");
+    previewBox = document.getElementById("previewBox");
+    previewImg = document.getElementById("previewImg");
+    topTitle = document.getElementById("topTitle");
+    loading = document.getElementById("loading");
 
-  document.querySelectorAll(".class-item").forEach(btn => {
-    btn.onclick = () => {
-      currentCate = btn.dataset.cate;
-      topTitle.innerText = currentCate + "壁纸";
-      oldImgArr = [];
-      wallList.innerHTML = "";
-      showPage("home");
-      loadMore();
-    };
-  });
+    // 分类点击绑定
+    document.querySelectorAll(".class-item").forEach(btn=>{
+        btn.onclick = function(){
+            currentType = this.dataset.type;
+            topTitle.innerText = this.innerText;
+            oldImgArr = [];
+            wallList.innerHTML = "";
+            showPage("home");
+            loadMore();
+        }
+    })
 
-  loadMore();
-});
+    loadMore();
+})
 
-function showPage(page) {
-  currentPage = page;
-  document.querySelectorAll(".page").forEach(p => {
-    p.classList.toggle("active", p.id === page + "Page");
-  });
-  const navs = document.querySelectorAll(".nav-item");
-  navs[0].classList.toggle("active", page === "home");
-  navs[1].classList.toggle("active", page === "cate");
+// 页面切换
+function showPage(page){
+    document.querySelectorAll(".page").forEach(p=>{
+        p.classList.remove("active");
+    })
+    document.getElementById(page+"Page").classList.add("active");
+
+    let navs = document.querySelectorAll(".nav-item");
+    navs[0].classList.remove("active");
+    navs[1].classList.remove("active");
+    if(page === "home") navs[0].classList.add("active");
+    if(page === "cate") navs[1].classList.add("active");
 }
 
-function getQuery() {
-  switch (currentCate) {
-    case "风景": return "nature";
-    case "汽车": return "car";
-    case "二次元": return "anime";
-    case "人像": return "portrait";
-    case "美食": return "food";
-    case "影视": return "movie";
-    case "古风": return "chinese";
-    case "游戏": return "game";
-    default: return "wallpaper";
-  }
+// 核心：每个分类 单独对应专属精准图片
+function getImg(){
+    let r = Math.floor(Math.random() * 9999);
+    switch(currentType){
+        case "dongman":
+            return `https://picsum.photos/1080/1920?anime&r=${r}`;
+        case "fengjing":
+            return `https://picsum.photos/1080/1920?nature&r=${r}`;
+        case "qiche":
+            return `https://picsum.photos/1080/1920?car&r=${r}`;
+        case "renxiang":
+            return `https://picsum.photos/1080/1920?portrait&r=${r}`;
+        case "meishi":
+            return `https://picsum.photos/1080/1920?food&r=${r}`;
+        case "yingshi":
+            return `https://picsum.photos/1080/1920?movie&r=${r}`;
+        case "gufeng":
+            return `https://picsum.photos/1080/1920?china&r=${r}`;
+        case "youxi":
+            return `https://picsum.photos/1080/1920?game&r=${r}`;
+        default:
+            return `https://picsum.photos/1080/1920?random&r=${r}`;
+    }
 }
 
-// 关键修复：换成支持关键词分类的接口
-function getImgUrl() {
-  const q = getQuery();
-  const t = Date.now() + Math.random();
-  return `https://loremflickr.com/1080/1920/${q}?random=${t}`;
+// 加载壁纸
+function loadMore(){
+    if(lock) return;
+    lock = true;
+    loading.style.display = "block";
+
+    let html = wallList.innerHTML;
+    for(let i=0;i<18;i++){
+        let url = getImg();
+        if(oldImgArr.includes(url)) continue;
+        oldImgArr.push(url);
+        html += `
+        <div class="wall-item" onclick="openPre('${url}')">
+            <img src="${url}">
+        </div>
+        `
+    }
+
+    wallList.innerHTML = html;
+    loading.style.display = "none";
+    lock = false;
 }
 
-function loadMore() {
-  if (lock) return;
-  lock = true;
-  loading.style.display = "block";
-
-  let html = wallList.innerHTML;
-  for (let i = 0; i < 20; i++) {
-    const url = getImgUrl();
-    if (oldImgArr.includes(url)) continue;
-    oldImgArr.push(url);
-    html += `
-    <div class="wall-item" onclick="openPre('${url}')">
-      <img src="${url}" loading="lazy">
-    </div>`;
-  }
-
-  wallList.innerHTML = html;
-  loading.style.display = "none";
-  setTimeout(() => lock = false, 600);
+// 预览关闭保存
+function openPre(url){
+    previewImg.src = url;
+    previewBox.style.display = "flex";
+}
+function closePre(){
+    previewBox.style.display = "none";
+}
+function saveImg(){
+    let a = document.createElement("a");
+    a.href = previewImg.src;
+    a.download = "极简壁纸_"+Date.now()+".jpg";
+    a.click();
 }
 
-function openPre(url) {
-  previewImg.src = url;
-  previewBox.style.display = "flex";
+// 无限滚动加载
+window.onscroll = function(){
+    if(lock) return;
+    let sT = document.documentElement.scrollTop;
+    let sH = document.documentElement.scrollHeight;
+    let cH = document.documentElement.clientHeight;
+    if(sT + cH + 200 >= sH){
+        loadMore();
+    }
 }
-
-function closePre() {
-  previewBox.style.display = "none";
-}
-
-function saveImg() {
-  const a = document.createElement("a");
-  a.href = previewImg.src;
-  a.download = "极简壁纸_" + Date.now() + ".jpg";
-  a.click();
-}
-
-document.getElementById("searchInput").addEventListener("keyup", e => {
-  const k = e.target.value.trim();
-  if (!k) return;
-  currentCate = k;
-  topTitle.innerText = k + "壁纸";
-  oldImgArr = [];
-  wallList.innerHTML = "";
-  showPage("home");
-  loadMore();
-});
-
-window.addEventListener("scroll", () => {
-  if (lock) return;
-  const st = document.documentElement.scrollTop || document.body.scrollTop;
-  const sh = document.documentElement.scrollHeight;
-  const ch = document.documentElement.clientHeight;
-  if (st + ch >= sh - 400) loadMore();
-});
 </script>
+
 </body>
 </html>
