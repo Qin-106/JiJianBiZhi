@@ -204,10 +204,15 @@
 
   <script>
 <script>
+<script>
 let currentPage = "home";
 let currentCate = "随机";
 let oldImgArr = [];
 let lock = false;
+
+/* ===== Unsplash 配置 ===== */
+const UNSPLASH_KEY = "YOUR_ACCESS_KEY"; // ← 换成你的
+const UNSPLASH_API = "https://api.unsplash.com/search/photos";
 
 const wallList = document.getElementById("wallList");
 const previewBox = document.getElementById("previewBox");
@@ -215,7 +220,6 @@ const previewImg = document.getElementById("previewImg");
 const topTitle = document.getElementById("topTitle");
 const loading = document.getElementById("loading");
 
-// 页面切换
 function showPage(page){
     currentPage = page;
     document.querySelectorAll(".page").forEach(p =>
@@ -227,41 +231,52 @@ function showPage(page){
         .classList.toggle("active", page === "cate");
 }
 
-// ✅ 每个分类绑定固定图片 ID（Picsum 官方）
-const cateImages = {
-    "风景": [1015,1016,1018,1020,1024,1031,1035,1040,1043,1049],
-    "汽车": [1052,1057,1062,1067,1071,1079,1084,1091,1095,1100],
-    "二次元": [1105,1110,1115,1120,1125,1130,1135,1140,1145,1150],
-    "人像": [1155,1160,1165,1170,1175,1180,1185,1190,1195,1200],
-    "美食": [1205,1210,1215,1220,1225,1230,1235,1240,1245,1250],
-    "影视": [1255,1260,1265,1270,1275,1280,1285,1290,1295,1300],
-    "古风": [1305,1310,1315,1320,1325,1330,1335,1340,1345,1350],
-    "游戏": [1355,1360,1365,1370,1375,1380,1385,1390,1395,1400]
-};
-
-// ✅ 修复：补全完整 URL
-function getImgUrl(){
-    const list = cateImages[currentCate] || cateImages["风景"];
-    const id = list[Math.floor(Math.random() * list.length)];
-    return `https://picsum.photos/id/${id}/1080/1920`;
+/* ✅ 分类 → Unsplash 搜索词 */
+function getQuery(){
+    switch(currentCate){
+        case "风景": return "nature";
+        case "汽车": return "car";
+        case "二次元": return "anime";
+        case "人像": return "portrait";
+        case "美食": return "food";
+        case "影视": return "cinema";
+        case "古风": return "chinese traditional";
+        case "游戏": return "gaming";
+        default: return "wallpaper";
+    }
 }
 
-// 加载更多
-function loadMore(){
-    let html = wallList.innerHTML;
+/* ✅ 从 Unsplash 拉取图片 */
+async function loadMore(){
+    if(lock) return;
+    lock = true;
     loading.style.display = "block";
 
-    setTimeout(()=>{
-        for(let i=0;i<20;i++){
-            const url = getImgUrl();
-            if(oldImgArr.includes(url)) continue;
+    try {
+        const query = getQuery();
+        const res = await fetch(
+            `${UNSPLASH_API}?query=${query}&per_page=20&client_id=${UNSPLASH_KEY}`
+        );
+        const data = await res.json();
+
+        let html = wallList.innerHTML;
+        data.results.forEach(item => {
+            const url = item.urls.full;
+            if(oldImgArr.includes(url)) return;
             oldImgArr.push(url);
-            html += `<div class="wall-item" onclick="openPre('${url}')">
-                <img src="${url}" loading="lazy"></div>`;
-        }
+
+            html += `
+            <div class="wall-item" onclick="openPre('${url}')">
+                <img src="${item.urls.small}" loading="lazy">
+            </div>`;
+        });
         wallList.innerHTML = html;
-        loading.style.display = "none";
-    },300);
+    } catch(e){
+        console.error("加载失败", e);
+    }
+
+    loading.style.display = "none";
+    lock = false;
 }
 
 function openPre(url){
@@ -278,7 +293,7 @@ function saveImg(){
     a.click();
 }
 
-// 分类点击
+/* 分类点击 */
 document.querySelectorAll(".class-item").forEach(btn=>{
     btn.onclick = ()=>{
         currentCate = btn.dataset.cate;
@@ -290,25 +305,21 @@ document.querySelectorAll(".class-item").forEach(btn=>{
     };
 });
 
-// 搜索
+/* 搜索 */
 document.getElementById("searchInput").addEventListener("keyup", e=>{
     const k = e.target.value.trim();
     if(!k) return;
-    const match = ["风景","汽车","二次元","人像","美食","影视","古风","游戏"]
-        .find(c=>c.includes(k));
-    if(match){
-        currentCate = match;
-        topTitle.innerText = match + "壁纸";
-        oldImgArr = [];
-        wallList.innerHTML = "";
-        showPage("home");
-        loadMore();
-    }
+    currentCate = k;
+    topTitle.innerText = k + "壁纸";
+    oldImgArr = [];
+    wallList.innerHTML = "";
+    showPage("home");
+    loadMore();
 });
 
 document.addEventListener("DOMContentLoaded", loadMore);
 
-// 无限滚动
+/* 滚动加载 */
 window.addEventListener("scroll",()=>{
     if(lock) return;
     const st = document.documentElement.scrollTop || document.body.scrollTop;
@@ -317,16 +328,16 @@ window.addEventListener("scroll",()=>{
     if(st + ch >= sh - 400){
         lock = true;
         loadMore();
-        setTimeout(()=>lock=false,800);
     }
 });
 
-// PWA
+/* PWA */
 if("serviceWorker" in navigator){
     window.addEventListener("load",()=>{
         navigator.serviceWorker.register("service-worker.js");
     });
 }
+</script>
 </script>
   </script>
 </body>
