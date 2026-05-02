@@ -1,309 +1,120 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>极简壁纸</title>
+<script>
+let currentPage = "home";
+let currentCate = "随机";
+let oldImgArr = [];
+let lock = false;
 
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#121212" />
+const wallList = document.getElementById("wallList");
+const previewBox = document.getElementById("previewBox");
+const previewImg = document.getElementById("previewImg");
+const topTitle = document.getElementById("topTitle");
+const loading = document.getElementById("loading");
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      background: #121212;
-      color: #fff;
-      font-family: sans-serif;
-      padding-bottom: 70px;
-    }
-
-    .top-bar {
-      position: sticky;
-      top: 0;
-      background: #1f1f1f;
-      padding: 12px;
-      text-align: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
-      z-index: 10;
-    }
-    .top-bar input {
-      margin-top: 8px;
-      width: 90%;
-      padding: 8px 12px;
-      border-radius: 20px;
-      border: none;
-      outline: none;
-      font-size: 14px;
-      background: #333;
-      color: #fff;
-    }
-
-    .page {
-      display: none;
-      padding: 10px;
-    }
-    .page.active {
-      display: block;
-    }
-
-    .nav-bar {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 60px;
-      background: #1f1f1f;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-    }
-
-    .nav-item,
-    .class-item {
-      background: none;
-      border: none;
-      font-family: sans-serif;
-      cursor: pointer;
-      color: #999;
-      font-size: 16px;
-    }
-    .nav-item.active {
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .wall-list {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .wall-item {
-      background: #222;
-      border-radius: 12px;
-      overflow: hidden;
-      aspect-ratio: 9/16;
-    }
-
-    .wall-item img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .class-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 20px;
-    }
-
-    .loading {
-      text-align: center;
-      padding: 20px;
-      color: #aaa;
-    }
-
-    .preview-box {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.98);
-      display: none;
-      z-index: 999;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .preview-box img {
-      width: 90%;
-      max-width: 600px;
-      border-radius: 12px;
-    }
-
-    .btn-box {
-      text-align: center;
-      margin-top: 30px;
-    }
-
-    .btn {
-      padding: 10px 25px;
-      background: #2979ff;
-      border: none;
-      color: #fff;
-      border-radius: 6px;
-      margin: 0 8px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="top-bar">
-    <div id="topTitle">极简壁纸</div>
-    <input id="searchInput" placeholder="搜索分类或关键词" />
-  </div>
-
-  <div id="homePage" class="page active">
-    <div class="wall-list" id="wallList"></div>
-    <div class="loading" id="loading">加载中...</div>
-  </div>
-
-  <div id="catePage" class="page">
-    <div class="class-list">
-      <button class="class-item" data-cate="风景">🌄 风景壁纸</button>
-      <button class="class-item" data-cate="汽车">🚗 汽车机车壁纸</button>
-      <button class="class-item" data-cate="二次元">🎨 二次元动漫壁纸</button>
-      <button class="class-item" data-cate="人像">👩 美女人像壁纸</button>
-      <button class="class-item" data-cate="美食">🍔 美食静物壁纸</button>
-      <button class="class-item" data-cate="影视">🎬 影视大片壁纸</button>
-      <button class="class-item" data-cate="古风">🏮 古风国风壁纸</button>
-      <button class="class-item" data-cate="游戏">🎮 游戏电竞壁纸</button>
-    </div>
-  </div>
-
-  <div class="nav-bar">
-    <button class="nav-item active" onclick="showPage('home')">首页</button>
-    <button class="nav-item" onclick="showPage('cate')">分类</button>
-  </div>
-
-  <div class="preview-box" id="previewBox">
-    <img id="previewImg" />
-    <div class="btn-box">
-      <button class="btn" onclick="saveImg()">保存图片</button>
-      <button class="btn" onclick="closePre()">关闭</button>
-    </div>
-  </div>
-
-  <!-- ✅ 唯一合法的 script -->
-  <script>
-    let currentPage = "home";
-    let currentCate = "随机";
-    let oldImgArr = [];
-    let lock = false;
-
-    const UNSPLASH_KEY = "YOUR_ACCESS_KEY"; // ← 换成你的
-    const UNSPLASH_API = "https://api.unsplash.com/search/photos";
-
-    const wallList = document.getElementById("wallList");
-    const previewBox = document.getElementById("previewBox");
-    const previewImg = document.getElementById("previewImg");
-    const topTitle = document.getElementById("topTitle");
-    const loading = document.getElementById("loading");
-
-    function showPage(page) {
-      currentPage = page;
-      document.querySelectorAll(".page").forEach(p =>
+function showPage(page){
+    currentPage = page;
+    document.querySelectorAll(".page").forEach(p =>
         p.classList.toggle("active", p.id === page + "Page")
-      );
-      document.querySelectorAll(".nav-item")[0].classList.toggle("active", page === "home");
-      document.querySelectorAll(".nav-item")[1].classList.toggle("active", page === "cate");
-    }
+    );
+    document.querySelectorAll(".nav-item")[0]
+        .classList.toggle("active", page === "home");
+    document.querySelectorAll(".nav-item")[1]
+        .classList.toggle("active", page === "cate");
+}
 
-    function getQuery() {
-      switch (currentCate) {
+/* ✅ 分类 → Unsplash Source 关键词 */
+function getQuery(){
+    switch(currentCate){
         case "风景": return "nature";
         case "汽车": return "car";
         case "二次元": return "anime";
         case "人像": return "portrait";
         case "美食": return "food";
         case "影视": return "cinema";
-        case "古风": return "chinese traditional";
+        case "古风": return "chinese+traditional";
         case "游戏": return "gaming";
         default: return "wallpaper";
-      }
     }
+}
 
-    async function loadMore() {
-      if (lock) return;
-      lock = true;
-      loading.style.display = "block";
+/* ✅ 稳定、无鉴权、不黑屏 */
+function getImgUrl(){
+    const q = getQuery();
+    const t = Date.now() + Math.random();
+    return `https://source.unsplash.com/random/1080x1920/?${q}&t=${t}`;
+}
 
-      try {
-        const res = await fetch(
-          `${UNSPLASH_API}?query=${getQuery()}&per_page=20&client_id=${UNSPLASH_KEY}`
-        );
-        const data = await res.json();
+function loadMore(){
+    if(lock) return;
+    lock = true;
+    loading.style.display = "block";
 
-        let html = wallList.innerHTML;
-        data.results.forEach(item => {
-          const url = item.urls.full;
-          if (oldImgArr.includes(url)) return;
-          oldImgArr.push(url);
-
-          html += `
-            <div class="wall-item" onclick="openPre('${url}')">
-              <img src="${item.urls.small}" loading="lazy">
-            </div>
-          `;
-        });
-        wallList.innerHTML = html;
-      } catch (e) {
-        console.error("加载失败", e);
-      }
-
-      loading.style.display = "none";
-      lock = false;
+    let html = wallList.innerHTML;
+    for(let i=0;i<20;i++){
+        const url = getImgUrl();
+        if(oldImgArr.includes(url)) continue;
+        oldImgArr.push(url);
+        html += `
+        <div class="wall-item" onclick="openPre('${url}')">
+            <img src="${url}" loading="lazy">
+        </div>`;
     }
+    wallList.innerHTML = html;
+    loading.style.display = "none";
+    lock = false;
+}
 
-    function openPre(url) {
-      previewImg.src = url;
-      previewBox.style.display = "flex";
-    }
-    function closePre() {
-      previewBox.style.display = "none";
-    }
-    function saveImg() {
-      const a = document.createElement("a");
-      a.href = previewImg.src;
-      a.download = "极简壁纸.jpg";
-      a.click();
-    }
+function openPre(url){
+    previewImg.src = url;
+    previewBox.style.display = "flex";
+}
+function closePre(){
+    previewBox.style.display = "none";
+}
+function saveImg(){
+    const a = document.createElement("a");
+    a.href = previewImg.src;
+    a.download = "极简壁纸.jpg";
+    a.click();
+}
 
-    document.querySelectorAll(".class-item").forEach(btn => {
-      btn.onclick = () => {
+document.querySelectorAll(".class-item").forEach(btn=>{
+    btn.onclick = ()=>{
         currentCate = btn.dataset.cate;
         topTitle.innerText = currentCate + "壁纸";
         oldImgArr = [];
         wallList.innerHTML = "";
         showPage("home");
         loadMore();
-      };
-    });
+    };
+});
 
-    document.getElementById("searchInput").addEventListener("keyup", e => {
-      const k = e.target.value.trim();
-      if (!k) return;
-      currentCate = k;
-      topTitle.innerText = k + "壁纸";
-      oldImgArr = [];
-      wallList.innerHTML = "";
-      showPage("home");
-      loadMore();
-    });
+document.getElementById("searchInput").addEventListener("keyup", e=>{
+    const k = e.target.value.trim();
+    if(!k) return;
+    currentCate = k;
+    topTitle.innerText = k + "壁纸";
+    oldImgArr = [];
+    wallList.innerHTML = "";
+    showPage("home");
+    loadMore();
+});
 
-    document.addEventListener("DOMContentLoaded", loadMore);
+document.addEventListener("DOMContentLoaded", loadMore);
 
-    window.addEventListener("scroll", () => {
-      if (lock) return;
-      const st = document.documentElement.scrollTop || document.body.scrollTop;
-      const sh = document.documentElement.scrollHeight;
-      const ch = document.documentElement.clientHeight;
-      if (st + ch >= sh - 400) {
+window.addEventListener("scroll",()=>{
+    if(lock) return;
+    const st = document.documentElement.scrollTop || document.body.scrollTop;
+    const sh = document.documentElement.scrollHeight;
+    const ch = document.documentElement.clientHeight;
+    if(st + ch >= sh - 400){
         lock = true;
         loadMore();
-      }
-    });
-
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
-      });
     }
-  </script>
-</body>
-</html>
+});
+
+if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>{
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
