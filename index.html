@@ -203,28 +203,31 @@
   </div>
 
   <script>
-    let currentPage = "home";
-    let currentCate = "随机";
-    let oldImgArr = [];
-    let lock = false;
+<script>
+let currentPage = "home";
+let currentCate = "随机";
+let oldImgArr = [];
+let lock = false;
 
-    const wallList = document.getElementById("wallList");
-    const previewBox = document.getElementById("previewBox");
-    const previewImg = document.getElementById("previewImg");
-    const topTitle = document.getElementById("topTitle");
-    const loading = document.getElementById("loading");
+const wallList = document.getElementById("wallList");
+const previewBox = document.getElementById("previewBox");
+const previewImg = document.getElementById("previewImg");
+const topTitle = document.getElementById("topTitle");
+const loading = document.getElementById("loading");
 
-    // 页面切换
-    function showPage(page) {
-      currentPage = page;
-      document.querySelectorAll(".page").forEach((p) => {
-        p.classList.toggle("active", p.id === page + "Page");
-      });
-      document.querySelectorAll(".nav-item")[0].classList.toggle("active", page === "home");
-      document.querySelectorAll(".nav-item")[1].classList.toggle("active", page === "cate");
-    }
+// 页面切换
+function showPage(page){
+    currentPage = page;
+    document.querySelectorAll(".page").forEach(p =>
+        p.classList.toggle("active", p.id === page + "Page")
+    );
+    document.querySelectorAll(".nav-item")[0]
+        .classList.toggle("active", page === "home");
+    document.querySelectorAll(".nav-item")[1]
+        .classList.toggle("active", page === "cate");
+}
 
-   // ✅ 每个分类绑定一组固定图片 ID（来自 Picsum 官方）
+// ✅ 每个分类绑定固定图片 ID（Picsum 官方）
 const cateImages = {
     "风景": [1015,1016,1018,1020,1024,1031,1035,1040,1043,1049],
     "汽车": [1052,1057,1062,1067,1071,1079,1084,1091,1095,1100],
@@ -236,104 +239,95 @@ const cateImages = {
     "游戏": [1355,1360,1365,1370,1375,1380,1385,1390,1395,1400]
 };
 
+// ✅ 修复：补全完整 URL
 function getImgUrl(){
     const list = cateImages[currentCate] || cateImages["风景"];
     const id = list[Math.floor(Math.random() * list.length)];
     return `https://picsum.photos/id/${id}/1080/1920`;
 }
 
-    // 加载更多壁纸
-    function loadMore() {
-      let html = wallList.innerHTML;
-      loading.style.display = "block"; // 显示加载中
+// 加载更多
+function loadMore(){
+    let html = wallList.innerHTML;
+    loading.style.display = "block";
 
-      // 模拟加载（实际项目中可去掉，这里为了演示）
-      setTimeout(() => {
-        for (let i = 0; i < 20; i++) {
-          const url = getImgUrl();
-          if (oldImgArr.includes(url)) continue; // 避免重复
-          oldImgArr.push(url);
-          html += `<div class="wall-item" onclick="openPre('${url}')">
-            <img src="${url}" loading="lazy" alt="壁纸" />
-          </div>`;
+    setTimeout(()=>{
+        for(let i=0;i<20;i++){
+            const url = getImgUrl();
+            if(oldImgArr.includes(url)) continue;
+            oldImgArr.push(url);
+            html += `<div class="wall-item" onclick="openPre('${url}')">
+                <img src="${url}" loading="lazy"></div>`;
         }
         wallList.innerHTML = html;
-        loading.style.display = "none"; // 隐藏加载中
-      }, 300);
-    }
+        loading.style.display = "none";
+    },300);
+}
 
-    // 打开预览
-    function openPre(url) {
-      previewImg.src = url;
-      previewBox.style.display = "flex"; // 用 flex 居中
-    }
+function openPre(url){
+    previewImg.src = url;
+    previewBox.style.display = "flex";
+}
+function closePre(){
+    previewBox.style.display = "none";
+}
+function saveImg(){
+    const a = document.createElement("a");
+    a.href = previewImg.src;
+    a.download = "极简壁纸.jpg";
+    a.click();
+}
 
-    // 关闭预览
-    function closePre() {
-      previewBox.style.display = "none";
-    }
-
-    // 保存图片
-    function saveImg() {
-      const a = document.createElement("a");
-      a.href = previewImg.src;
-      a.download = "极简壁纸.jpg";
-      a.click();
-    }
-
-    // 分类按钮点击事件
-    document.querySelectorAll(".class-item").forEach((btn) => {
-      btn.onclick = () => {
+// 分类点击
+document.querySelectorAll(".class-item").forEach(btn=>{
+    btn.onclick = ()=>{
         currentCate = btn.dataset.cate;
         topTitle.innerText = currentCate + "壁纸";
-        oldImgArr = []; // 清空历史图片
-        wallList.innerHTML = ""; // 清空列表
-        showPage("home"); // 切回首页
-        loadMore(); // 加载新图
-      };
-    });
+        oldImgArr = [];
+        wallList.innerHTML = "";
+        showPage("home");
+        loadMore();
+    };
+});
 
-    // 搜索框事件
-    document.getElementById("searchInput").addEventListener("keyup", (e) => {
-      const k = e.target.value.trim();
-      if (!k) return;
-      const match = ["风景", "汽车", "二次元", "人像", "美食", "影视", "古风", "游戏"].find((c) =>
-        c.includes(k)
-      );
-      if (match) {
+// 搜索
+document.getElementById("searchInput").addEventListener("keyup", e=>{
+    const k = e.target.value.trim();
+    if(!k) return;
+    const match = ["风景","汽车","二次元","人像","美食","影视","古风","游戏"]
+        .find(c=>c.includes(k));
+    if(match){
         currentCate = match;
         topTitle.innerText = match + "壁纸";
         oldImgArr = [];
         wallList.innerHTML = "";
         showPage("home");
         loadMore();
-      }
-    });
+    }
+});
 
-    // 页面加载完成后初始化
-    document.addEventListener("DOMContentLoaded", () => {
-      loadMore(); // 首次加载
-    });
+document.addEventListener("DOMContentLoaded", loadMore);
 
-    // 滚动加载更多
-    window.addEventListener("scroll", () => {
-      if (lock) return;
-      const st = document.documentElement.scrollTop || document.body.scrollTop;
-      const sh = document.documentElement.scrollHeight;
-      const ch = document.documentElement.clientHeight;
-      if (st + ch >= sh - 400) {
+// 无限滚动
+window.addEventListener("scroll",()=>{
+    if(lock) return;
+    const st = document.documentElement.scrollTop || document.body.scrollTop;
+    const sh = document.documentElement.scrollHeight;
+    const ch = document.documentElement.clientHeight;
+    if(st + ch >= sh - 400){
         lock = true;
         loadMore();
-        setTimeout(() => (lock = false), 800); // 防抖
-      }
-    });
-
-    // 注册 Service Worker（PWA 必需）
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
-      });
+        setTimeout(()=>lock=false,800);
     }
+});
+
+// PWA
+if("serviceWorker" in navigator){
+    window.addEventListener("load",()=>{
+        navigator.serviceWorker.register("service-worker.js");
+    });
+}
+</script>
   </script>
 </body>
 </html>
