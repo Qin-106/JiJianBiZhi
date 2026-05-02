@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>极简壁纸</title>
+
   <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#121212" />
 
@@ -20,7 +21,6 @@
       padding-bottom: 70px;
     }
 
-    /* 顶部栏 */
     .top-bar {
       position: sticky;
       top: 0;
@@ -42,7 +42,6 @@
       color: #fff;
     }
 
-    /* 页面切换 */
     .page {
       display: none;
       padding: 10px;
@@ -51,7 +50,6 @@
       display: block;
     }
 
-    /* 底部导航 */
     .nav-bar {
       position: fixed;
       bottom: 0;
@@ -63,6 +61,7 @@
       justify-content: space-around;
       align-items: center;
     }
+
     .nav-item,
     .class-item {
       background: none;
@@ -77,56 +76,39 @@
       font-weight: bold;
     }
 
-    /* 壁纸列表（网格布局） */
     .wall-list {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
       margin-top: 10px;
     }
+
     .wall-item {
       background: #222;
       border-radius: 12px;
       overflow: hidden;
-      aspect-ratio: 9/16; /* 保持手机壁纸比例 */
+      aspect-ratio: 9/16;
     }
+
     .wall-item img {
       width: 100%;
       height: 100%;
       object-fit: cover;
-      transition: transform 0.3s;
-    }
-    .wall-item img:hover {
-      transform: scale(1.02);
     }
 
-    /* 分类列表 */
     .class-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin-top: 20px;
     }
-    .class-item {
-      background: #1f1f1f;
-      padding: 18px;
-      border-radius: 10px;
-      font-size: 16px;
-      text-align: left;
-      transition: background 0.2s;
-    }
-    .class-item:hover {
-      background: #333;
-    }
 
-    /* 加载中 */
     .loading {
       text-align: center;
       padding: 20px;
       color: #aaa;
     }
 
-    /* 预览弹窗 */
     .preview-box {
       position: fixed;
       inset: 0;
@@ -136,15 +118,18 @@
       justify-content: center;
       align-items: center;
     }
+
     .preview-box img {
       width: 90%;
       max-width: 600px;
       border-radius: 12px;
     }
+
     .btn-box {
       text-align: center;
       margin-top: 30px;
     }
+
     .btn {
       padding: 10px 25px;
       background: #2979ff;
@@ -154,26 +139,20 @@
       margin: 0 8px;
       cursor: pointer;
     }
-    .btn:hover {
-      background: #1565c0;
-    }
   </style>
 </head>
 
 <body>
-  <!-- 顶部栏 -->
   <div class="top-bar">
     <div id="topTitle">极简壁纸</div>
     <input id="searchInput" placeholder="搜索分类或关键词" />
   </div>
 
-  <!-- 首页（壁纸列表） -->
   <div id="homePage" class="page active">
     <div class="wall-list" id="wallList"></div>
     <div class="loading" id="loading">加载中...</div>
   </div>
 
-  <!-- 分类页 -->
   <div id="catePage" class="page">
     <div class="class-list">
       <button class="class-item" data-cate="风景">🌄 风景壁纸</button>
@@ -187,13 +166,11 @@
     </div>
   </div>
 
-  <!-- 底部导航 -->
   <div class="nav-bar">
     <button class="nav-item active" onclick="showPage('home')">首页</button>
     <button class="nav-item" onclick="showPage('cate')">分类</button>
   </div>
 
-  <!-- 预览弹窗 -->
   <div class="preview-box" id="previewBox">
     <img id="previewImg" />
     <div class="btn-box">
@@ -202,38 +179,33 @@
     </div>
   </div>
 
+  <!-- ✅ 唯一合法的 script -->
   <script>
-<script>
-<script>
-let currentPage = "home";
-let currentCate = "随机";
-let oldImgArr = [];
-let lock = false;
+    let currentPage = "home";
+    let currentCate = "随机";
+    let oldImgArr = [];
+    let lock = false;
 
-/* ===== Unsplash 配置 ===== */
-const UNSPLASH_KEY = "YOUR_ACCESS_KEY"; // ← 换成你的
-const UNSPLASH_API = "https://api.unsplash.com/search/photos";
+    const UNSPLASH_KEY = "YOUR_ACCESS_KEY"; // ← 换成你的
+    const UNSPLASH_API = "https://api.unsplash.com/search/photos";
 
-const wallList = document.getElementById("wallList");
-const previewBox = document.getElementById("previewBox");
-const previewImg = document.getElementById("previewImg");
-const topTitle = document.getElementById("topTitle");
-const loading = document.getElementById("loading");
+    const wallList = document.getElementById("wallList");
+    const previewBox = document.getElementById("previewBox");
+    const previewImg = document.getElementById("previewImg");
+    const topTitle = document.getElementById("topTitle");
+    const loading = document.getElementById("loading");
 
-function showPage(page){
-    currentPage = page;
-    document.querySelectorAll(".page").forEach(p =>
+    function showPage(page) {
+      currentPage = page;
+      document.querySelectorAll(".page").forEach(p =>
         p.classList.toggle("active", p.id === page + "Page")
-    );
-    document.querySelectorAll(".nav-item")[0]
-        .classList.toggle("active", page === "home");
-    document.querySelectorAll(".nav-item")[1]
-        .classList.toggle("active", page === "cate");
-}
+      );
+      document.querySelectorAll(".nav-item")[0].classList.toggle("active", page === "home");
+      document.querySelectorAll(".nav-item")[1].classList.toggle("active", page === "cate");
+    }
 
-/* ✅ 分类 → Unsplash 搜索词 */
-function getQuery(){
-    switch(currentCate){
+    function getQuery() {
+      switch (currentCate) {
         case "风景": return "nature";
         case "汽车": return "car";
         case "二次元": return "anime";
@@ -243,102 +215,95 @@ function getQuery(){
         case "古风": return "chinese traditional";
         case "游戏": return "gaming";
         default: return "wallpaper";
+      }
     }
-}
 
-/* ✅ 从 Unsplash 拉取图片 */
-async function loadMore(){
-    if(lock) return;
-    lock = true;
-    loading.style.display = "block";
+    async function loadMore() {
+      if (lock) return;
+      lock = true;
+      loading.style.display = "block";
 
-    try {
-        const query = getQuery();
+      try {
         const res = await fetch(
-            `${UNSPLASH_API}?query=${query}&per_page=20&client_id=${UNSPLASH_KEY}`
+          `${UNSPLASH_API}?query=${getQuery()}&per_page=20&client_id=${UNSPLASH_KEY}`
         );
         const data = await res.json();
 
         let html = wallList.innerHTML;
         data.results.forEach(item => {
-            const url = item.urls.full;
-            if(oldImgArr.includes(url)) return;
-            oldImgArr.push(url);
+          const url = item.urls.full;
+          if (oldImgArr.includes(url)) return;
+          oldImgArr.push(url);
 
-            html += `
+          html += `
             <div class="wall-item" onclick="openPre('${url}')">
-                <img src="${item.urls.small}" loading="lazy">
-            </div>`;
+              <img src="${item.urls.small}" loading="lazy">
+            </div>
+          `;
         });
         wallList.innerHTML = html;
-    } catch(e){
+      } catch (e) {
         console.error("加载失败", e);
+      }
+
+      loading.style.display = "none";
+      lock = false;
     }
 
-    loading.style.display = "none";
-    lock = false;
-}
+    function openPre(url) {
+      previewImg.src = url;
+      previewBox.style.display = "flex";
+    }
+    function closePre() {
+      previewBox.style.display = "none";
+    }
+    function saveImg() {
+      const a = document.createElement("a");
+      a.href = previewImg.src;
+      a.download = "极简壁纸.jpg";
+      a.click();
+    }
 
-function openPre(url){
-    previewImg.src = url;
-    previewBox.style.display = "flex";
-}
-function closePre(){
-    previewBox.style.display = "none";
-}
-function saveImg(){
-    const a = document.createElement("a");
-    a.href = previewImg.src;
-    a.download = "极简壁纸.jpg";
-    a.click();
-}
-
-/* 分类点击 */
-document.querySelectorAll(".class-item").forEach(btn=>{
-    btn.onclick = ()=>{
+    document.querySelectorAll(".class-item").forEach(btn => {
+      btn.onclick = () => {
         currentCate = btn.dataset.cate;
         topTitle.innerText = currentCate + "壁纸";
         oldImgArr = [];
         wallList.innerHTML = "";
         showPage("home");
         loadMore();
-    };
-});
+      };
+    });
 
-/* 搜索 */
-document.getElementById("searchInput").addEventListener("keyup", e=>{
-    const k = e.target.value.trim();
-    if(!k) return;
-    currentCate = k;
-    topTitle.innerText = k + "壁纸";
-    oldImgArr = [];
-    wallList.innerHTML = "";
-    showPage("home");
-    loadMore();
-});
+    document.getElementById("searchInput").addEventListener("keyup", e => {
+      const k = e.target.value.trim();
+      if (!k) return;
+      currentCate = k;
+      topTitle.innerText = k + "壁纸";
+      oldImgArr = [];
+      wallList.innerHTML = "";
+      showPage("home");
+      loadMore();
+    });
 
-document.addEventListener("DOMContentLoaded", loadMore);
+    document.addEventListener("DOMContentLoaded", loadMore);
 
-/* 滚动加载 */
-window.addEventListener("scroll",()=>{
-    if(lock) return;
-    const st = document.documentElement.scrollTop || document.body.scrollTop;
-    const sh = document.documentElement.scrollHeight;
-    const ch = document.documentElement.clientHeight;
-    if(st + ch >= sh - 400){
+    window.addEventListener("scroll", () => {
+      if (lock) return;
+      const st = document.documentElement.scrollTop || document.body.scrollTop;
+      const sh = document.documentElement.scrollHeight;
+      const ch = document.documentElement.clientHeight;
+      if (st + ch >= sh - 400) {
         lock = true;
         loadMore();
-    }
-});
-
-/* PWA */
-if("serviceWorker" in navigator){
-    window.addEventListener("load",()=>{
-        navigator.serviceWorker.register("service-worker.js");
+      }
     });
-}
-</script>
-</script>
+
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("service-worker.js");
+      });
+    }
   </script>
 </body>
 </html>
